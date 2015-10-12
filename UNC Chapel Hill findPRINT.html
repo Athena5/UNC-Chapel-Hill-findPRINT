@@ -1,0 +1,170 @@
+<html>
+    <head>
+
+<style type="text/css">
+  html { height: 100% }
+  body { height: 100%; margin: 0; padding: 0 }
+  #map_canvas { height: 100% }
+</style>
+<script type="text/javascript"
+  src=
+"http://maps.googleapis.com/maps/api/js">
+</script>
+<script type="text/javascript">
+
+var printers = [
+['Alumni Hall', 35.913191, -79.051025, 'Outside Room 203'],
+['Beard Hall', 35.907206, -79.053384, 'Inside Room 104'],
+['Berryhill Hall', 35.906345, -79.05168, '1st Floor Lounge (Access restricted to Med students)'],
+['Campus Y', 35.911359, -79.051218, '1st Floor'],
+['Hanes Hall', 35.910766, -79.05131, '2nd Floor Career Services'],
+['Carrington Hall', 35.906723, -79.051923, 'Inside Room 205'],
+['Davis Library', 35.910887, -79.048001, '1st Floor Info Commons (Color Printer Also Available)'],
+['Global Education Center', 35.907818, -79.053942, 'Coffee Shop'],
+['Hanes Art Center', 35.912391, -79.054366, '102 Sloane Art Library'],
+['Health Sciences Library', 35.905707, -79.052869, '1st Floor Copy Room (Color Printer also Available at Entry Level)'],
+['McColl Building', 35.899669, -79.046149, '1st Floor Study Rooms, 3rd Floor Atrium'],
+['Venable Hall', 35.909622, -79.051304, 'G301A Kenan Science Library'],
+['Van Heche-Wettach Hall', 35.908682, -79.042463, 'Back of Law Library by Stack'],
+['Wilson Library', 35.909435, -79.049728, '302 Music Library'],
+['Carroll Hall', 35.910227, -79.051884, '2nd Floor Park Library, Outside Room 111'],
+['Peabody Hall', 35.910499, -79.053526, 'Outside Room 204'],
+['South Student and Academic Services Building', 35.904109, -79.045065, '1st Floor'],
+['Koury Oral Health Sciences Building', 35.90484, -79.0534, 'Room G401'],
+['Manning Hall', 35.911281, -79.049189, 'Room 117'],
+['Tate-Turner-Kuralt Building', 35.907102, -79.054247, 'Room 501'],
+['Rosenau Hall', 35.905891, -79.053692, 'Room 201'],
+['Stone Center', 35.907936, -79.050174, '310 Stone Center Library'],
+['Student Union', 35.910255, -79.047547, 'Lower Level Underground Lounge'],
+['Undergraduate Library', 35.909775, -79.048964, 'Entry Copier Room, Room 037 (Color Printer also Available at Entry Level)'],
+['Carmichael Residence Hall', 35.908204, -79.045843, 'Main Lobby (Restricted to Residents Only)'],
+['Cobb Residence Hall', 35.912374, -79.044708, 'Basement Near Drink Machines (Restricted to Residents Only)'],
+['Craige Residence Hall', 35.902725, -79.045182, 'Mailroom (Restricted to Residents Only)'],
+['Craige North Residence Hall', 35.903533, -79.0459, 'Basement Lounge (Restricted to Residents Only)'],
+['Ehringhaus Residence Hall', 35.904353, -79.042913, 'Main Floor Lobby (Restricted to Residents Only)'],
+['Hardin Residence Hall', 35.903965, -79.046118, 'Study Lounge Next to Laundry (Restricted to Residents Only)'],
+['Hinton James Residence Hall', 35.902357, -79.04327, '1st Floor Lounge (Restricted to Residents Only)'],
+['Horton Residence Hall', 35.903129, -79.043647, 'Basement Lounge (Restricted to Residents Only)'],
+['Joyner Residence Hall', 35.911792, -79.046784, 'Next to Mailroom (Restricted to Residents Only)'],
+['Kenan Residence Hall', 35.914576, -79.047515, 'Mailroom (Restricted to Residents Only)'],
+['Koury Residence Hall', 35.90357, -79.043477, 'Basement Game Room (Restricted to Residents Only)'],
+['Mangum Residence Hall', 35.912017, -79.047511, '1st Floor Lounge (Restricted to Residents Only)'],
+['Morrison Residence Hall', 35.904513, -79.046207, 'Mailroom (Restricted to Residents Only)'],
+['Odum Village Building 613A', 35.900751, -79.049196, 'Cyber Lounge Next to Mailboxes (Restricted to Residents Only)'],
+['Parker Residence Hall', 35.906969, -79.044419, 'Mailroom (Restricted to Residents Only)'],
+['Ram Village Building 1 Residence Hall', 35.901884, -79.046052, '1st Floor Game Room (Restricted to Residents Only)'],
+['Ram Village Building 4 Residence Hall', 35.901662, -79.043697, 'Business Center (Restricted to Residents Only)'],
+['Stacy Residence Hall', 35.912984, -79.046131, 'Mailroom (Restricted to Residents Only)']
+];
+var directionsDisplay = new google.maps.DirectionsRenderer();
+var directionsService = new google.maps.DirectionsService();
+var circle = 'http://www.robotwoods.com/dev/misc/bluecircle.png'
+var map;
+var currentLatLng;
+var startMarker;
+var startInfoWindow;
+
+function locate() {
+        navigator.geolocation.getCurrentPosition(initialize, fail);
+}
+
+function fail() {
+         alert('navigator.geolocation failed, may not be supported');
+}
+
+
+function initialize(position) {
+	currentLatLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude)
+	var myOptions = {
+      		center: currentLatLng,
+      		zoom: 15,
+	      	mapTypeId: google.maps.MapTypeId.ROADMAP
+	};
+	
+	map = new google.maps.Map(document.getElementById("default"), myOptions);
+
+ 	startMarker = new google.maps.Marker({
+        	position: currentLatLng,
+        	map: map,
+        	icon: circle
+        });
+	
+	startInfoWindow = new google.maps.InfoWindow();
+	startInfoWindow.setContent("You are here.");
+        startInfoWindow.open(map,startMarker);
+ 	google.maps.event.addListener(startMarker, "click", function () {
+ 		startInfoWindow.setContent("You are here.");
+        	startInfoWindow.open(map,startMarker);
+ 	});
+
+	setMarkers(map,printers)
+	directionsDisplay.setMap(map);
+	directionsDisplay.setPanel(document.getElementById("directionsPanel"));
+}
+
+function setMarkers(map,printers) {
+
+        var marker, i
+
+	for (i = 0; i < printers.length; i++) {  
+		var building = printers[i][0]
+ 		var lat = printers[i][1]
+ 		var long = printers[i][2]
+ 		var description = printers[i][3]
+
+ 		latlngset = new google.maps.LatLng(lat, long);
+
+  		var marker = new google.maps.Marker({  
+          		map: map,
+			title: building,
+			position: latlngset  
+        	});
+     
+        	var content = "Printer Location: " + description     
+
+	  	var infowindow = new google.maps.InfoWindow()
+
+		google.maps.event.addListener(marker,'click', (function(marker,content,infowindow) { 
+        		return function() {
+				infowindow.setContent(content);
+           			infowindow.open(map,marker);
+	   			if (navigator.geolocation)
+				{
+					navigator.geolocation.getCurrentPosition(function(position) {
+      						var pos = {
+        						lat: position.coords.latitude,
+				        		lng: position.coords.longitude
+						};
+
+		      				startInfoWindow.setPosition(currentLatLng);
+	      					startInfoWindow.setContent('You are here');
+      						
+						calculateRoute(marker);
+    					});
+				}  
+        		};
+		})(marker,content,infowindow)); 
+
+	}
+}
+
+function calculateRoute(endMarker) {
+  	var request = {
+    		origin:currentLatLng,
+		destination:endMarker.getPosition(),
+		travelMode: google.maps.TravelMode.WALKING
+	};
+
+  	directionsService.route(request, function(result, status) {
+    		if (status == google.maps.DirectionsStatus.OK) {
+      			directionsDisplay.setDirections(result);
+			directionsDisplay.setMap(map);
+    		}
+	});
+}
+</script>
+</head>
+<body onload="locate()">
+<div id="default" style="width:100%; height:100%"></div>
+</body>
+</html>
